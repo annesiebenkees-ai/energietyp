@@ -36,6 +36,10 @@ button{font:inherit;cursor:pointer;border:0}
 .band{display:inline-block;background:var(--beere);color:var(--rosa);font-family:"Bagel",serif;font-size:15px;padding:4px 12px;border-radius:999px;margin-bottom:10px}
 .hinweis{background:var(--gelb);border-radius:14px;padding:10px 14px;font-size:15px;margin-top:12px}
 .paar{background:var(--rosa-hell);border-radius:14px;padding:12px 14px;margin-top:12px}
+.kraft{margin-top:20px;background:var(--gelb);border-radius:18px;padding:18px 16px;text-align:center;font-family:"Bagel",serif;color:var(--beere);font-size:20px;line-height:1.35}
+.kraft span{display:block;font-family:"Nunito",sans-serif;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.haus{background:var(--weiss)}.haus ul{padding-left:0;list-style:none;margin:14px 0}.haus li{padding:10px 0;border-top:1px dashed var(--rosa-hell)}.haus li b{color:var(--beere)}
+.motto{font-family:"Bagel",serif;color:var(--beere);font-size:26px;line-height:1.2;text-align:center;margin:18px 0 6px}
 .cta{background:var(--beere);color:var(--rosa-hell);text-align:center}
 .cta h2{color:var(--gelb)}
 .cta a{display:inline-block;margin-top:14px;background:var(--gelb);color:var(--beere);font-family:"Bagel",serif;font-size:19px;padding:14px 26px;border-radius:999px;text-decoration:none}
@@ -131,7 +135,8 @@ function zeige(j){
     <h3>Deine Energie</h3><p>${esc(m.energie)}</p>
     <h3>Woran du merkst, dass du gegen dich arbeitest</h3><p>${esc(m.merkst)}</p>
     <h3>So entscheidest du gut</h3><p>${esc(m.autoritaet_text)}${m.autoritaet_sicher === false ? ' <span class="klein">(Ohne Uhrzeit nicht ganz sicher.)</span>' : ''}</p>
-    <h3>Dein erster Schritt</h3><p>${esc(m.schritt)}</p></div>`;
+    <h3>Dein erster Schritt</h3><p>${esc(m.schritt)}</p>
+    <div class="kraft"><span>Dein Kraftsatz</span>${esc(m.kraftsatz).replace('\n','<br>')}</div></div>`;
   for (const k of j.kinder) {
     h += `<div class="karte"><span class="band">${esc(k.name)}</span><h2>${esc(k.kurz)}</h2>
       ${k.sicher ? '' : `<div class="hinweis">Ohne Uhrzeit ist das der wahrscheinlichste Typ.</div>`}
@@ -143,10 +148,20 @@ function zeige(j){
     <p>Dein Typ zeigt dir, wie deine Energie grundsätzlich läuft. Dein ganzer Human-Design-Plan ist aber viel mehr: Dein <strong>Profil</strong> erzählt, welche Rolle du im Leben einnimmst und wie du lernst, deine offenen und festen <strong>Zentren</strong> zeigen, wo du Energie von anderen aufnimmst und wo du dir treu bleibst, und deine Kanäle und Tore machen dich zu dem Menschen, der nur du bist. All das habe ich hier bewusst weggelassen, damit du einen einfachen Einstieg hast.</p>
     <p>Bei deinen Kindern ist es genauso: Erst mit dem ganzen Plan siehst du, warum zwei Kinder vom selben Typ trotzdem so verschieden sein können.</p>
     ${j.readings ? `<a class="knopf" style="text-align:center;text-decoration:none" href="${esc(j.readings)}" target="_blank" rel="noopener">Dein ausführliches Reading</a><p class="klein" style="text-align:center">Für dich, dein Kind oder eure ganze Familie</p>` : ''}</div>`;
-  h += `<div class="karte cta"><h2>Du willst es selbst verstehen?</h2>
-    <p>Im Soul-Family-Haus lernst du, das alles zu lesen und zu verstehen, für dich und für deine Kinder. Du lernst, was dein Körper wirklich braucht, und wenn du magst, lernst du auch, andere Familien so zu begleiten und dein eigenes Business darauf aufzubauen. Komm in meinen Warteraum, dort erfährst du als Erste, wann es losgeht.</p>
-    <a href="https://wa.me/${esc(j.whatsapp)}?text=${encodeURIComponent('Hallo Anne, ich bin ' + j.vorname + ', mein Energietyp ist ' + m.kurz.replace('Du bist ', '') + '. Ich möchte in deinen Warteraum.')}" target="_blank" rel="noopener">Per WhatsApp in den Warteraum</a>
-    <p class="klein" style="color:var(--rosa-hell);margin-top:14px">oder <a style="all:unset;text-decoration:underline;cursor:pointer" href="${esc(j.warteraum)}" target="_blank" rel="noopener">direkt der Community beitreten</a></p></div>`;
+  h += `<div class="karte haus"><span class="band">Das Soul-Family-Haus</span><h2>Stell dir vor, es ist Dienstagabend</h2>
+    <p>Die Kinder schlafen, und du sitzt nicht ausgelaugt auf dem Sofa, sondern spürst noch Kraft in dir. Du weißt, warum dein Kind heute so wütend war und was es eigentlich von dir gebraucht hat. Du hast gegessen, was deinem Körper guttut, und auf deinem Laptop wartet etwas, das ganz nach dir klingt.</p>
+    <p>Genau dahin begleite ich dich im Soul-Family-Haus, ein Jahr lang und Schritt für Schritt, in deinem Tempo:</p>
+    <ul>
+      <li><b>Du.</b> Dein Human Design, dein Nervensystem und dein Körper, und was er wirklich braucht, damit du nicht mehr gegen dich arbeitest.</li>
+      <li><b>Deine Kinder.</b> Wie jedes einzelne von ihnen tickt, und wie du es begleitest, statt es irgendwohin zu ziehen.</li>
+      <li><b>Eure Familie.</b> Mehr Ruhe im Alltag, gesundes Essen für alle und ein Zuhause, in dem jede und jeder sein darf.</li>
+      <li><b>Dein Eigenes.</b> Wenn du magst, lernst du, andere Familien so zu begleiten, und baust dir mit meinen KI-Werkzeugen dein eigenes Business auf.</li>
+    </ul>
+    <p>Du kannst das Haus auch nur für dich und deine Familie betreten. Beides ist richtig.</p>
+    <div class="motto">Erst du. Dann ihr.<br>Dann deine Freiheit.</div></div>`;
+  h += `<div class="karte cta"><h2>Die Türen öffnen sich bald</h2>
+    <p>Im Warteraum erfährst du als Erste, wann es losgeht, und bekommst bis dahin Impulse für dich und deine Kinder.</p>
+    <a href="${esc(j.warteraum)}" target="_blank" rel="noopener">In den Warteraum</a></div>`;
   const e = $('#ergebnis'); e.innerHTML = h; e.style.display = 'block';
   $('#start').style.display = 'none'; window.scrollTo({top: 0, behavior: 'smooth'});
 }
