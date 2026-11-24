@@ -203,6 +203,10 @@ function zeige(j){
       <h3>Für morgen früh</h3><p>${esc(k.morgen)}</p>
       <div class="paar"><strong>Ihr zwei zusammen:</strong> ${esc(k.paar)}</div></div>`;
   }
+  const gleich = {}; j.kinder.forEach(k => (gleich[k.kurz] = gleich[k.kurz] || []).push(k.name));
+  const doppelt = Object.entries(gleich).filter(([, n]) => n.length > 1);
+  if (doppelt.length) h += `<div class="karte" style="background:var(--gelb)"><h3 style="margin-top:0">Gleicher Typ, und doch ganz verschieden</h3>
+    <p>${doppelt.map(([typ, n]) => n.slice(0, -1).map(esc).join(', ') + ' und ' + esc(n[n.length - 1]) + (n.length > 2 ? ' sind hier alle ' : ' sind hier beide ') + esc(typ.replace('Manifestierendes', 'Manifestierende').replace(/-Kind$/, '-Kinder'))).join('. ')}. Das heißt nicht, dass sie gleich sind. Hier siehst du nur den Typ, also ganz vereinfacht, wie ihre Energie grundsätzlich läuft. Ihr Profil, ihre offenen und festen Zentren und ihre ganz eigenen Tore haben wir uns noch gar nicht angeschaut, und genau dort zeigt sich, warum jedes deiner Kinder auf seine eigene Art tickt.</p></div>`;
   h += `<div class="karte"><h2>Das war bewusst nur der Anfang</h2>
     <p>Dein Typ zeigt dir, wie deine Energie grundsätzlich läuft. Dein ganzer Human-Design-Plan ist aber viel mehr: Dein <strong>Profil</strong> erzählt, welche Rolle du im Leben einnimmst und wie du lernst, deine offenen und festen <strong>Zentren</strong> zeigen, wo du Energie von anderen aufnimmst und wo du dir treu bleibst, und deine Kanäle und Tore machen dich zu dem Menschen, der nur du bist. All das habe ich hier bewusst weggelassen, damit du einen einfachen Einstieg hast.</p>
     <p>Bei deinen Kindern ist es genauso: Erst mit dem ganzen Plan siehst du, warum zwei Kinder vom selben Typ trotzdem so verschieden sein können.</p>
