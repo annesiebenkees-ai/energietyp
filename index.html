@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dein Energietyp · Anne Siebenkees</title>
+<meta name="description" content="Finde in 2 Minuten heraus, wie deine Energie wirklich läuft und wie du und deine Kinder zusammenpasst.">
+<style>
+@font-face{font-family:"Bagel";src:url(fonts/bagel.ttf) format("truetype");font-display:swap}
+@font-face{font-family:"Nunito";src:url(fonts/nunito.woff2) format("woff2");font-weight:200 1000;font-display:swap}
+:root{--creme:#fbf4ef;--rosa:#e8a5b1;--rosa-hell:#f6dde2;--gelb:#f6df98;--beere:#9e2f3e;--ink:#2b1a1f;--grau:#7a6268;--weiss:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--creme);color:var(--ink);font:17px/1.6 "Nunito",system-ui,sans-serif}
+.wrap{max-width:560px;margin:0 auto;padding:32px 16px 64px}
+h1,h2,h3{font-family:"Bagel",Georgia,serif;font-weight:400;color:var(--beere);line-height:1.1;margin:0}
+h1{font-size:clamp(36px,9vw,52px)}
+h1 mark{background:var(--gelb);color:var(--beere);padding:0 .15em;border-radius:.2em}
+h2{font-size:28px;margin-bottom:8px}
+h3{font-size:21px;margin:18px 0 4px}
+.lead{margin:16px 0 28px;font-size:18px}
+.karte{background:var(--weiss);border-radius:22px;padding:22px 20px;margin:18px 0;box-shadow:0 6px 24px rgba(158,47,62,.08)}
+label{display:block;font-weight:700;font-size:15px;margin:14px 0 6px}
+input,select{width:100%;font:inherit;padding:12px 14px;border:2px solid var(--rosa-hell);border-radius:14px;background:var(--creme);color:var(--ink)}
+input:focus,select:focus{outline:none;border-color:var(--rosa)}
+.zeile{display:flex;gap:10px}.zeile>div{flex:1}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:15px}
+.check input{width:auto;margin-top:5px}
+.klein{font-size:14px;color:var(--grau)}
+button{font:inherit;cursor:pointer;border:0}
+.knopf{display:block;width:100%;margin-top:22px;padding:16px;border-radius:999px;background:var(--beere);color:var(--rosa-hell);font-family:"Bagel",serif;font-size:21px}
+.knopf:disabled{opacity:.6}
+.zweit{background:none;color:var(--beere);font-weight:700;padding:8px 0;text-decoration:underline}
+.kind{border-top:2px dashed var(--rosa-hell);margin-top:18px;padding-top:4px;position:relative}
+.weg{position:absolute;right:0;top:14px;background:none;color:var(--grau);font-size:14px}
+.fehler{background:var(--rosa-hell);color:var(--beere);border-radius:14px;padding:12px 14px;margin-top:16px;display:none}
+.band{display:inline-block;background:var(--beere);color:var(--rosa);font-family:"Bagel",serif;font-size:15px;padding:4px 12px;border-radius:999px;margin-bottom:10px}
+.hinweis{background:var(--gelb);border-radius:14px;padding:10px 14px;font-size:15px;margin-top:12px}
+.paar{background:var(--rosa-hell);border-radius:14px;padding:12px 14px;margin-top:12px}
+.cta{background:var(--beere);color:var(--rosa-hell);text-align:center}
+.cta h2{color:var(--gelb)}
+.cta a{display:inline-block;margin-top:14px;background:var(--gelb);color:var(--beere);font-family:"Bagel",serif;font-size:19px;padding:14px 26px;border-radius:999px;text-decoration:none}
+#ergebnis{display:none}
+footer{margin-top:40px;text-align:center;font-size:13px;color:var(--grau)}
+footer a{color:var(--grau)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="start">
+    <h1>Wie läuft deine Energie <mark>wirklich?</mark></h1>
+    <p class="lead">Vielleicht kennst du das: Andere Mamas scheinen den Tag locker zu schaffen, und du bist schon mittags leer. Nichts an dir ist falsch. Vielleicht lebst du nur gegen deine eigene Energie. Gib deine Geburtsdaten ein, und du siehst in zwei Minuten deinen Energietyp nach Human Design, dazu erste Schritte für dich und deine Kinder.</p>
+
+    <form id="form" class="karte" novalidate>
+      <h2>Du</h2>
+      <div class="zeile">
+        <div><label for="vorname">Vorname</label><input id="vorname" autocomplete="given-name" required></div>
+      </div>
+      <label for="datum">Geburtsdatum</label>
+      <input id="datum" type="date" required>
+      <div class="zeile">
+        <div><label for="zeit">Uhrzeit der Geburt</label><input id="zeit" type="time"></div>
+        <div><label for="land">Geboren in</label>
+          <select id="land"><option value="DE">Deutschland</option><option value="AT">Österreich</option><option value="CH">Schweiz</option><option value="LU">Luxemburg</option><option value="IT">Italien</option><option value="NL">Niederlande</option><option value="BE">Belgien</option><option value="PL">Polen</option></select></div>
+      </div>
+      <p class="klein">Die Uhrzeit steht in deiner Geburtsurkunde oder im Mutterpass. Weißt du sie nicht, lass das Feld leer, dann rechne ich über den ganzen Tag und sage dir, wie sicher dein Ergebnis ist.</p>
+
+      <div id="kinder"></div>
+      <button type="button" class="zweit" id="kindPlus">+ Kind hinzufügen</button>
+
+      <p class="klein">Deine Daten bleiben auf deinem Handy. Gerechnet wird direkt hier im Browser, nichts wird gespeichert oder verschickt.</p>
+      <div class="fehler" id="fehler"></div>
+      <button class="knopf" id="los" type="submit">Zeig mir meinen Energietyp</button>
+    </form>
+  </section>
+
+  <section id="ergebnis"></section>
+
+  <footer>Human Design ist ein Werkzeug zur Selbstreflexion, keine Diagnose und kein Ersatz für ärztlichen oder therapeutischen Rat.<br><a href="https://annesiebenkees.de/impressum" target="_blank" rel="noopener">Impressum</a> · <a href="https://annesiebenkees.de/datenschutz" target="_blank" rel="noopener">Datenschutz</a></footer>
+</div>
+<script src="astronomy.browser.min.js"></script>
+<script src="hd.js"></script>
+<script src="texte.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+let n = 0;
+function kindFeld(){
+  if (document.querySelectorAll('.kind').length >= 4) return;
+  n++; const d = document.createElement('div'); d.className = 'kind';
+  d.innerHTML = `<button type="button" class="weg" aria-label="Kind entfernen">entfernen</button>
+    <h3>Kind</h3>
+    <label>Vorname oder Spitzname</label><input class="k-name" maxlength="30">
+    <label>Geburtsdatum</label><input class="k-datum" type="date">
+    <label>Uhrzeit der Geburt (wenn bekannt)</label><input class="k-zeit" type="time">`;
+  d.querySelector('.weg').onclick = () => d.remove();
+  $('#kinder').appendChild(d);
+}
+$('#kindPlus').onclick = kindFeld;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const WHATSAPP = '4917641869543';
+const COMMUNITY = 'https://chat.whatsapp.com/Dhsly1cwnxZ7YOULYbXOFA';
+const READINGS = 'https://annesiebenkees-ai.github.io/readings/';
+const ZONEN = {DE:'Europe/Berlin',AT:'Europe/Vienna',CH:'Europe/Zurich',LU:'Europe/Luxembourg',IT:'Europe/Rome',NL:'Europe/Amsterdam',BE:'Europe/Brussels',PL:'Europe/Warsaw'};
+$('#form').onsubmit = e => {
+  e.preventDefault(); const f = $('#fehler'); f.style.display = 'none';
+  const vorname = $('#vorname').value.trim(), datum = $('#datum').value, zeit = $('#zeit').value, tz = ZONEN[$('#land').value];
+  if (!vorname || !datum) { f.textContent = 'Bitte gib deinen Vornamen und dein Geburtsdatum an.'; f.style.display = 'block'; return; }
+  const b = $('#los'); b.disabled = true; b.textContent = 'Ich rechne …';
+  setTimeout(() => {
+    try {
+      const T = window.TEXTE, mt = HD.typFuer(datum, zeit, tz);
+      const j = {vorname, whatsapp: WHATSAPP, warteraum: COMMUNITY, readings: READINGS,
+        mama: {...mt, ...T.MAMA[mt.typ], autoritaet_text: T.AUTORITAET[mt.autoritaet] || ''}, kinder: []};
+      for (const k of document.querySelectorAll('.kind')) {
+        const kd = k.querySelector('.k-datum').value; if (!kd) continue;
+        const kt = HD.typFuer(kd, k.querySelector('.k-zeit').value, tz);
+        const paar = T.PAAR[`${+T.SAKRAL.includes(mt.typ)}${+T.SAKRAL.includes(kt.typ)}`];
+        j.kinder.push({name: k.querySelector('.k-name').value.trim() || 'Dein Kind', ...kt, ...T.KIND[kt.typ], paar});
+      }
+      zeige(j);
+    } catch (err) { console.error(err); f.textContent = 'Da ist etwas schiefgelaufen. Bitte prüf das Datum.'; f.style.display = 'block'; }
+    finally { b.disabled = false; b.textContent = 'Zeig mir meinen Energietyp'; }
+  }, 30);
+};
+
+function zeige(j){
+  const m = j.mama;
+  let h = `<div class="karte"><span class="band">${esc(j.vorname)}, so läuft deine Energie</span>
+    <h2>${esc(m.kurz)}</h2>
+    ${m.sicher ? '' : `<div class="hinweis">Ohne Uhrzeit ist das dein wahrscheinlichster Typ. Je nach Geburtszeit kann es auch ein anderer sein, mit der genauen Uhrzeit wird es sicher.</div>`}
+    <h3>Deine Energie</h3><p>${esc(m.energie)}</p>
+    <h3>Woran du merkst, dass du gegen dich arbeitest</h3><p>${esc(m.merkst)}</p>
+    <h3>So entscheidest du gut</h3><p>${esc(m.autoritaet_text)}${m.autoritaet_sicher === false ? ' <span class="klein">(Ohne Uhrzeit nicht ganz sicher.)</span>' : ''}</p>
+    <h3>Dein erster Schritt</h3><p>${esc(m.schritt)}</p></div>`;
+  for (const k of j.kinder) {
+    h += `<div class="karte"><span class="band">${esc(k.name)}</span><h2>${esc(k.kurz)}</h2>
+      ${k.sicher ? '' : `<div class="hinweis">Ohne Uhrzeit ist das der wahrscheinlichste Typ.</div>`}
+      <h3>Was ${esc(k.name)} von dir braucht</h3><p>${esc(k.braucht)}</p>
+      <h3>Für morgen früh</h3><p>${esc(k.morgen)}</p>
+      <div class="paar"><strong>Ihr zwei zusammen:</strong> ${esc(k.paar)}</div></div>`;
+  }
+  h += `<div class="karte"><h2>Das war bewusst nur der Anfang</h2>
+    <p>Dein Typ zeigt dir, wie deine Energie grundsätzlich läuft. Dein ganzer Human-Design-Plan ist aber viel mehr: Dein <strong>Profil</strong> erzählt, welche Rolle du im Leben einnimmst und wie du lernst, deine offenen und festen <strong>Zentren</strong> zeigen, wo du Energie von anderen aufnimmst und wo du dir treu bleibst, und deine Kanäle und Tore machen dich zu dem Menschen, der nur du bist. All das habe ich hier bewusst weggelassen, damit du einen einfachen Einstieg hast.</p>
+    <p>Bei deinen Kindern ist es genauso: Erst mit dem ganzen Plan siehst du, warum zwei Kinder vom selben Typ trotzdem so verschieden sein können.</p>
+    ${j.readings ? `<a class="knopf" style="text-align:center;text-decoration:none" href="${esc(j.readings)}" target="_blank" rel="noopener">Dein ausführliches Reading</a><p class="klein" style="text-align:center">Für dich, dein Kind oder eure ganze Familie</p>` : ''}</div>`;
+  h += `<div class="karte cta"><h2>Du willst es selbst verstehen?</h2>
+    <p>Im Soul-Family-Haus lernst du, das alles zu lesen und zu verstehen, für dich und für deine Kinder. Du lernst, was dein Körper wirklich braucht, und wenn du magst, lernst du auch, andere Familien so zu begleiten und dein eigenes Business darauf aufzubauen. Komm in meinen Warteraum, dort erfährst du als Erste, wann es losgeht.</p>
+    <a href="https://wa.me/${esc(j.whatsapp)}?text=${encodeURIComponent('Hallo Anne, ich bin ' + j.vorname + ', mein Energietyp ist ' + m.kurz.replace('Du bist ', '') + '. Ich möchte in deinen Warteraum.')}" target="_blank" rel="noopener">Per WhatsApp in den Warteraum</a>
+    <p class="klein" style="color:var(--rosa-hell);margin-top:14px">oder <a style="all:unset;text-decoration:underline;cursor:pointer" href="${esc(j.warteraum)}" target="_blank" rel="noopener">direkt der Community beitreten</a></p></div>`;
+  const e = $('#ergebnis'); e.innerHTML = h; e.style.display = 'block';
+  $('#start').style.display = 'none'; window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+</body>
+</html>
