@@ -32,6 +32,9 @@ button{font:inherit;cursor:pointer;border:0}
 .zweit{background:none;color:var(--beere);font-weight:700;padding:8px 0;text-decoration:underline}
 .kind{border-top:2px dashed var(--rosa-hell);margin-top:18px;padding-top:4px;position:relative}
 .weg{position:absolute;right:0;top:14px;background:none;color:var(--grau);font-size:14px}
+.ortfeld{position:relative}.vorschlaege{position:absolute;left:0;right:0;top:100%;z-index:5;background:var(--weiss);border-radius:14px;box-shadow:0 8px 24px rgba(158,47,62,.18);overflow:hidden}
+.vorschlaege button{display:block;width:100%;text-align:left;padding:12px 14px;background:none;font-size:15px;border-top:1px solid var(--rosa-hell)}
+.vorschlaege button:first-child{border-top:0}.vorschlaege button:hover{background:var(--rosa-hell)}
 .fehler{background:var(--rosa-hell);color:var(--beere);border-radius:14px;padding:12px 14px;margin-top:16px;display:none}
 .band{display:inline-block;background:var(--beere);color:var(--rosa);font-family:"Bagel",serif;font-size:15px;padding:4px 12px;border-radius:999px;margin-bottom:10px}
 .hinweis{background:var(--gelb);border-radius:14px;padding:10px 14px;font-size:15px;margin-top:12px}
@@ -63,10 +66,9 @@ footer a{color:var(--grau)}
       <input id="datum" type="date" required>
       <div class="zeile">
         <div><label for="zeit">Uhrzeit der Geburt</label><input id="zeit" type="time"></div>
-        <div><label for="land">Geboren in</label>
-          <select id="land"><option value="DE">Deutschland</option><option value="AT">Österreich</option><option value="CH">Schweiz</option><option value="LU">Luxemburg</option><option value="IT">Italien</option><option value="NL">Niederlande</option><option value="BE">Belgien</option><option value="PL">Polen</option></select></div>
+        <div class="ortfeld"><label for="ort">Geburtsort</label><input id="ort" autocomplete="off" placeholder="z. B. Plauen"><div class="vorschlaege"></div></div>
       </div>
-      <p class="klein">Die Uhrzeit steht in deiner Geburtsurkunde oder im Mutterpass. Weißt du sie nicht, lass das Feld leer, dann rechne ich über den ganzen Tag und sage dir, wie sicher dein Ergebnis ist.</p>
+      <p class="klein">Die Uhrzeit steht in deiner Geburtsurkunde oder im Mutterpass. Weißt du sie nicht, lass das Feld leer, dann rechne ich über den ganzen Tag und sage dir, wie sicher dein Ergebnis ist. Der Ort bestimmt die Zeitzone, damit die Uhrzeit genau umgerechnet wird.</p>
 
       <div id="kinder"></div>
       <button type="button" class="zweit" id="kindPlus">+ Kind hinzufügen</button>
@@ -98,8 +100,10 @@ function kindFeld(){
     <h3>Kind</h3>
     <label>Vorname oder Spitzname</label><input class="k-name" maxlength="30">
     <label>Geburtsdatum</label><input class="k-datum" type="date">
-    <label>Uhrzeit der Geburt (wenn bekannt)</label><input class="k-zeit" type="time">`;
+    <label>Uhrzeit der Geburt (wenn bekannt)</label><input class="k-zeit" type="time">
+    <div class="ortfeld"><label>Geburtsort (falls anders als deiner)</label><input class="k-ort" autocomplete="off"><div class="vorschlaege"></div></div>`;
   d.querySelector('.weg').onclick = () => d.remove();
+  ortSuche(d.querySelector('.k-ort'));
   $('#kinder').appendChild(d);
 }
 $('#kindPlus').onclick = kindFeld;
@@ -109,22 +113,47 @@ const WHATSAPP = '4917641869543';
 const COMMUNITY = 'https://chat.whatsapp.com/Dhsly1cwnxZ7YOULYbXOFA';
 const READINGS = 'https://annesiebenkees-ai.github.io/readings/';
 const DIENST = 'https://78-18-2-119.sslip.io/lead';
-const ZONEN = {DE:'Europe/Berlin',AT:'Europe/Vienna',CH:'Europe/Zurich',LU:'Europe/Luxembourg',IT:'Europe/Rome',NL:'Europe/Amsterdam',BE:'Europe/Brussels',PL:'Europe/Warsaw'};
-$('#form').onsubmit = e => {
+const ORT_API = 'https://78-18-2-119.sslip.io/ort?q=';
+async function orteSuchen(q) { try { const r = await fetch(ORT_API + encodeURIComponent(q)); return r.ok ? await r.json() : []; } catch { return []; } }
+function ortSuche(inp) {
+  const box = inp.parentElement.querySelector('.vorschlaege'); let t;
+  inp.addEventListener('input', () => {
+    inp.dataset.tz = ''; clearTimeout(t); const q = inp.value.trim();
+    if (q.length < 2) { box.innerHTML = ''; return; }
+    t = setTimeout(async () => {
+      const l = await orteSuchen(q); box.innerHTML = '';
+      for (const o of l.slice(0, 5)) { const b = document.createElement('button'); b.type = 'button'; b.textContent = o.label;
+        b.onclick = () => { inp.value = o.label; inp.dataset.tz = o.tz; box.innerHTML = ''; }; box.appendChild(b); }
+    }, 250);
+  });
+  inp.addEventListener('blur', () => setTimeout(() => box.innerHTML = '', 200));
+}
+async function zoneFuer(inp, ersatz) {
+  if (!inp || !inp.value.trim()) return ersatz;
+  if (inp.dataset.tz) return inp.dataset.tz;
+  const l = await orteSuchen(inp.value.trim());
+  if (l[0]) { inp.value = l[0].label; inp.dataset.tz = l[0].tz; return l[0].tz; }
+  return ersatz;
+}
+ortSuche(document.getElementById('ort'));
+$('#form').onsubmit = async e => {
   e.preventDefault(); const f = $('#fehler'); f.style.display = 'none';
-  const vorname = $('#vorname').value.trim(), datum = $('#datum').value, zeit = $('#zeit').value, tz = ZONEN[$('#land').value];
+  const vorname = $('#vorname').value.trim(), datum = $('#datum').value, zeit = $('#zeit').value;
   const nummer = $('#nummer').value.trim();
   if (!vorname || !datum || !nummer) { f.textContent = 'Bitte gib deinen Vornamen, dein Geburtsdatum und deine WhatsApp-Nummer an.'; f.style.display = 'block'; return; }
   if (!$('#einw').checked) { f.textContent = 'Bitte setz das Häkchen, damit ich dir dein Ergebnis schicken darf.'; f.style.display = 'block'; return; }
   const b = $('#los'); b.disabled = true; b.textContent = 'Ich rechne …';
+  const tz = await zoneFuer($('#ort'), 'Europe/Berlin');
+  const kinderTz = []; for (const k of document.querySelectorAll('.kind')) kinderTz.push(await zoneFuer(k.querySelector('.k-ort'), tz));
   setTimeout(() => {
     try {
       const T = window.TEXTE, mt = HD.typFuer(datum, zeit, tz);
       const j = {vorname, whatsapp: WHATSAPP, warteraum: COMMUNITY, readings: READINGS,
         mama: {...mt, ...T.MAMA[mt.typ], autoritaet_text: T.AUTORITAET[mt.autoritaet] || ''}, kinder: []};
+      let ki = 0;
       for (const k of document.querySelectorAll('.kind')) {
-        const kd = k.querySelector('.k-datum').value; if (!kd) continue;
-        const kt = HD.typFuer(kd, k.querySelector('.k-zeit').value, tz);
+        const ktz = kinderTz[ki++]; const kd = k.querySelector('.k-datum').value; if (!kd) continue;
+        const kt = HD.typFuer(kd, k.querySelector('.k-zeit').value, ktz);
         const paar = T.PAAR[`${+T.SAKRAL.includes(mt.typ)}${+T.SAKRAL.includes(kt.typ)}`];
         j.kinder.push({name: k.querySelector('.k-name').value.trim() || 'Dein Kind', ...kt, ...T.KIND[kt.typ], paar});
       }
