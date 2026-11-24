@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dein Energietyp · Anne Siebenkees</title>
 <meta name="description" content="Finde in 2 Minuten heraus, wie deine Energie wirklich läuft und wie du und deine Kinder zusammenpasst.">
+<meta property="og:title" content="Dein Energietyp · Anne Siebenkees">
+<meta property="og:description" content="Wie deine Energie wirklich läuft, und was deine Kinder von dir brauchen.">
+<meta property="og:image" content="https://annesiebenkees-ai.github.io/energietyp/vorschau.jpg">
+<meta property="og:url" content="https://annesiebenkees-ai.github.io/energietyp/">
+<meta property="og:type" content="website">
 <style>
 @font-face{font-family:"Bagel";src:url(fonts/bagel.ttf) format("truetype");font-display:swap}
 @font-face{font-family:"Nunito";src:url(fonts/nunito.woff2) format("woff2");font-weight:200 1000;font-display:swap}
@@ -136,6 +141,20 @@ async function zoneFuer(inp, ersatz) {
   return ersatz;
 }
 ortSuche(document.getElementById('ort'));
+// Ergebnis aus dem WhatsApp-Link (#r=…): nur Vorname und Typen, keine Geburtsdaten
+(function ausLink() {
+  const m = location.hash.match(/^#r=([A-Za-z0-9_-]+)$/); if (!m) return;
+  try {
+    const b64 = m[1].replace(/-/g, '+').replace(/_/g, '/');
+    const r = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(b64), c => c.charCodeAt(0))));
+    const T = window.TEXTE; if (!T.MAMA[r.t]) return;
+    const j = {vorname: r.v, warteraum: COMMUNITY, readings: READINGS, aus_link: true,
+      mama: {typ: r.t, sicher: true, ...T.MAMA[r.t], autoritaet_text: T.AUTORITAET[r.a] || ''}, kinder: []};
+    for (const [name, typ] of r.k || []) if (T.KIND[typ]) j.kinder.push({name, typ, sicher: true, ...T.KIND[typ],
+      paar: T.PAAR[`${+T.SAKRAL.includes(r.t)}${+T.SAKRAL.includes(typ)}`]});
+    zeige(j);
+  } catch (e) { console.error(e); }
+})();
 $('#form').onsubmit = async e => {
   e.preventDefault(); const f = $('#fehler'); f.style.display = 'none';
   const vorname = $('#vorname').value.trim(), datum = $('#datum').value, zeit = $('#zeit').value;
@@ -159,7 +178,7 @@ $('#form').onsubmit = async e => {
       }
       zeige(j);
       fetch(DIENST, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({vorname, nummer, einwilligung: true,
-        website: $('#website').value, typ: mt.typ, kinder: j.kinder.map(k => ({name: k.name, typ: k.typ}))})})
+        website: $('#website').value, typ: mt.typ, autoritaet: mt.autoritaet, kinder: j.kinder.map(k => ({name: k.name, typ: k.typ}))})})
         .then(r => r.json()).then(r => { const h = document.getElementById('wa-hinweis'); if (h) h.textContent = r.ok ? 'Dein Ergebnis ist auf dem Weg in dein WhatsApp. Es kann ein paar Minuten dauern.' : (r.fehler || ''); })
         .catch(() => { const h = document.getElementById('wa-hinweis'); if (h) h.textContent = 'Die WhatsApp-Nachricht konnte gerade nicht verschickt werden. Dein Ergebnis siehst du hier trotzdem vollständig.'; });
     } catch (err) { console.error(err); f.textContent = 'Da ist etwas schiefgelaufen. Bitte prüf das Datum.'; f.style.display = 'block'; }
@@ -169,7 +188,7 @@ $('#form').onsubmit = async e => {
 
 function zeige(j){
   const m = j.mama;
-  let h = `<div class="hinweis" id="wa-hinweis" style="margin-bottom:14px">Ich schicke dir dein Ergebnis gerade per WhatsApp …</div><div class="karte"><span class="band">${esc(j.vorname)}, so läuft deine Energie</span>
+  let h = `${j.aus_link ? '' : '<div class="hinweis" id="wa-hinweis" style="margin-bottom:14px">Ich schicke dir dein Ergebnis gerade per WhatsApp …</div>'}<div class="karte"><span class="band">${esc(j.vorname)}, so läuft deine Energie</span>
     <h2>${esc(m.kurz)}</h2>
     ${m.sicher ? '' : `<div class="hinweis">Ohne Uhrzeit ist das dein wahrscheinlichster Typ. Je nach Geburtszeit kann es auch ein anderer sein, mit der genauen Uhrzeit wird es sicher.</div>`}
     <h3>Deine Energie</h3><p>${esc(m.energie)}</p>
