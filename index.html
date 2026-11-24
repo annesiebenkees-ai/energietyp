@@ -71,7 +71,11 @@ footer a{color:var(--grau)}
       <div id="kinder"></div>
       <button type="button" class="zweit" id="kindPlus">+ Kind hinzufügen</button>
 
-      <p class="klein">Deine Daten bleiben auf deinem Handy. Gerechnet wird direkt hier im Browser, nichts wird gespeichert oder verschickt.</p>
+      <label for="nummer">Deine WhatsApp-Nummer</label>
+      <input id="nummer" type="tel" autocomplete="tel" placeholder="z. B. 0176 12345678" required>
+      <input id="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+      <label class="check"><input type="checkbox" id="einw"> <span>Schick mir mein Ergebnis per WhatsApp. Ich bin einverstanden, dass Anne Siebenkees mir dafür schreibt und mich in ihren Warteraum einlädt. Abmelden geht jederzeit mit einer kurzen Nachricht.</span></label>
+      <p class="klein">Deine Geburtsdaten bleiben auf deinem Handy, gerechnet wird direkt hier im Browser. An mich gehen nur dein Vorname, deine Nummer und dein Typ. Mehr dazu in der <a href="https://annesiebenkees.de/datenschutz" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>
       <div class="fehler" id="fehler"></div>
       <button class="knopf" id="los" type="submit">Zeig mir meinen Energietyp</button>
     </form>
@@ -104,11 +108,14 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':
 const WHATSAPP = '4917641869543';
 const COMMUNITY = 'https://chat.whatsapp.com/Dhsly1cwnxZ7YOULYbXOFA';
 const READINGS = 'https://annesiebenkees-ai.github.io/readings/';
+const DIENST = 'https://78-18-2-119.sslip.io/lead';
 const ZONEN = {DE:'Europe/Berlin',AT:'Europe/Vienna',CH:'Europe/Zurich',LU:'Europe/Luxembourg',IT:'Europe/Rome',NL:'Europe/Amsterdam',BE:'Europe/Brussels',PL:'Europe/Warsaw'};
 $('#form').onsubmit = e => {
   e.preventDefault(); const f = $('#fehler'); f.style.display = 'none';
   const vorname = $('#vorname').value.trim(), datum = $('#datum').value, zeit = $('#zeit').value, tz = ZONEN[$('#land').value];
-  if (!vorname || !datum) { f.textContent = 'Bitte gib deinen Vornamen und dein Geburtsdatum an.'; f.style.display = 'block'; return; }
+  const nummer = $('#nummer').value.trim();
+  if (!vorname || !datum || !nummer) { f.textContent = 'Bitte gib deinen Vornamen, dein Geburtsdatum und deine WhatsApp-Nummer an.'; f.style.display = 'block'; return; }
+  if (!$('#einw').checked) { f.textContent = 'Bitte setz das Häkchen, damit ich dir dein Ergebnis schicken darf.'; f.style.display = 'block'; return; }
   const b = $('#los'); b.disabled = true; b.textContent = 'Ich rechne …';
   setTimeout(() => {
     try {
@@ -122,6 +129,10 @@ $('#form').onsubmit = e => {
         j.kinder.push({name: k.querySelector('.k-name').value.trim() || 'Dein Kind', ...kt, ...T.KIND[kt.typ], paar});
       }
       zeige(j);
+      fetch(DIENST, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({vorname, nummer, einwilligung: true,
+        website: $('#website').value, typ: mt.typ, kinder: j.kinder.map(k => ({name: k.name, typ: k.typ}))})})
+        .then(r => r.json()).then(r => { const h = document.getElementById('wa-hinweis'); if (h) h.textContent = r.ok ? 'Dein Ergebnis ist auf dem Weg in dein WhatsApp. Es kann ein paar Minuten dauern.' : (r.fehler || ''); })
+        .catch(() => { const h = document.getElementById('wa-hinweis'); if (h) h.textContent = 'Die WhatsApp-Nachricht konnte gerade nicht verschickt werden. Dein Ergebnis siehst du hier trotzdem vollständig.'; });
     } catch (err) { console.error(err); f.textContent = 'Da ist etwas schiefgelaufen. Bitte prüf das Datum.'; f.style.display = 'block'; }
     finally { b.disabled = false; b.textContent = 'Zeig mir meinen Energietyp'; }
   }, 30);
@@ -129,7 +140,7 @@ $('#form').onsubmit = e => {
 
 function zeige(j){
   const m = j.mama;
-  let h = `<div class="karte"><span class="band">${esc(j.vorname)}, so läuft deine Energie</span>
+  let h = `<div class="hinweis" id="wa-hinweis" style="margin-bottom:14px">Ich schicke dir dein Ergebnis gerade per WhatsApp …</div><div class="karte"><span class="band">${esc(j.vorname)}, so läuft deine Energie</span>
     <h2>${esc(m.kurz)}</h2>
     ${m.sicher ? '' : `<div class="hinweis">Ohne Uhrzeit ist das dein wahrscheinlichster Typ. Je nach Geburtszeit kann es auch ein anderer sein, mit der genauen Uhrzeit wird es sicher.</div>`}
     <h3>Deine Energie</h3><p>${esc(m.energie)}</p>
