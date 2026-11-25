@@ -119,6 +119,7 @@ const COMMUNITY = 'https://chat.whatsapp.com/Dhsly1cwnxZ7YOULYbXOFA';
 const READINGS = 'https://annesiebenkees-ai.github.io/readings/';
 const DIENST = 'https://78-18-2-119.sslip.io/lead';
 const ORT_API = 'https://78-18-2-119.sslip.io/ort?q=';
+const zaehl = e => { try { navigator.sendBeacon('https://78-18-2-119.sslip.io/zaehl?e=' + e); } catch {} };
 async function orteSuchen(q) { try { const r = await fetch(ORT_API + encodeURIComponent(q)); return r.ok ? await r.json() : []; } catch { return []; } }
 function ortSuche(inp) {
   const box = inp.parentElement.querySelector('.vorschlaege'); let t;
@@ -152,9 +153,10 @@ ortSuche(document.getElementById('ort'));
       mama: {typ: r.t, sicher: true, ...T.MAMA[r.t], autoritaet_text: T.AUTORITAET[r.a] || ''}, kinder: []};
     for (const [name, typ] of r.k || []) if (T.KIND[typ]) j.kinder.push({name, typ, sicher: true, ...T.KIND[typ],
       paar: T.PAAR[`${+T.SAKRAL.includes(r.t)}${+T.SAKRAL.includes(typ)}`]});
-    zeige(j);
+    zeige(j); zaehl('ergebnis-geoeffnet');
   } catch (e) { console.error(e); }
 })();
+if (!/^#r=/.test(location.hash)) zaehl('test-geoeffnet');
 $('#form').onsubmit = async e => {
   e.preventDefault(); const f = $('#fehler'); f.style.display = 'none';
   const vorname = $('#vorname').value.trim(), datum = $('#datum').value, zeit = $('#zeit').value;
